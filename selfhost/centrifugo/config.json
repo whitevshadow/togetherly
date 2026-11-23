@@ -1,0 +1,23 @@
+{
+  "log_level": "info",
+  "client": {
+    "allowed_origins": ["*"],
+    "insecure": false,
+    "allow_anonymous_connect_without_token": false,
+    "token": {
+      "hmac_secret_key": ""
+    }
+  },
+  "http_api": {
+    "key": ""
+  },
+  "channel": {
+    "namespaces": [
+      { "name": "pair", "allow_subscribe_for_client": true },
+      { "name": "user", "allow_subscribe_for_client": true },
+      { "name": "loc", "allow_subscribe_for_client": true },
+      { "name": "watch", "allow_subscribe_for_client": true },
+      { "name": "draw", "allow_subscribe_for_client": true }
+    ]
+  }
+}

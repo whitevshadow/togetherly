@@ -1,0 +1,15 @@
+.git
+.github
+.dart_tool
+.pub-cache
+.idea
+.vscode
+build
+.selfhost-data
+.env
+.env.*
+.app.env
+*.apk
+*.aab
+android/.gradle
+android/.idea

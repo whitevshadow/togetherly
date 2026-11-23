@@ -1,0 +1,45 @@
+services:
+  pocketbase:
+    build:
+      context: .
+      dockerfile: selfhost/Dockerfile.pocketbase
+      args:
+        PB_VERSION: ${PB_VERSION:-0.42.3}
+    restart: unless-stopped
+    environment:
+      PB_SUPERUSER_EMAIL: ${PB_SUPERUSER_EMAIL:?Run scripts/selfhost/first-run.sh first}
+      PB_SUPERUSER_PASSWORD: ${PB_SUPERUSER_PASSWORD:?Run scripts/selfhost/first-run.sh first}
+      PB_ENCRYPTION_KEY: ${PB_ENCRYPTION_KEY:?Run scripts/selfhost/first-run.sh first}
+      CENTRIFUGO_API: http://centrifugo:8000/api
+      CENTRIFUGO_API_KEY: ${CENTRIFUGO_API_KEY:?Run scripts/selfhost/first-run.sh first}
+      CENTRIFUGO_TOKEN_HMAC: ${CENTRIFUGO_TOKEN_HMAC:?Run scripts/selfhost/first-run.sh first}
+      MOD_SECRET: ${MOD_SECRET:?Run scripts/selfhost/first-run.sh first}
+      FB_WEB_API_KEY: ${FB_WEB_API_KEY:-}
+    volumes:
+      - ./.selfhost-data/pb_data:/pb/pb_data
+    ports:
+      - "0.0.0.0:8090:8090"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8090/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+    depends_on:
+      - centrifugo
+
+  centrifugo:
+    image: ${CENTRIFUGO_IMAGE:-centrifugo/centrifugo:v6.9.7}
+    restart: unless-stopped
+    command: ["centrifugo", "-c", "config.json"]
+    environment:
+      CENTRIFUGO_CLIENT_TOKEN_HMAC_SECRET_KEY: ${CENTRIFUGO_TOKEN_HMAC:?Run scripts/selfhost/first-run.sh first}
+      CENTRIFUGO_HTTP_API_KEY: ${CENTRIFUGO_API_KEY:?Run scripts/selfhost/first-run.sh first}
+    volumes:
+      - ./selfhost/centrifugo/config.json:/centrifugo/config.json:ro
+    ports:
+      - "0.0.0.0:8443:8000"
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
